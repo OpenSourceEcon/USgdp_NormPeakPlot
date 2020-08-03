@@ -245,7 +245,7 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
             rec_label_yrmth_lst, rec_beg_yrmth_lst, maxdate_rng_lst)
 
 
-def usgdp_npp(frwd_qtrs_main=10, bkwd_qtrs_main=3, frwd_qtrs_max=28,
+def usgdp_npp(frwd_qtrs_main=10, bkwd_qtrs_main=3, frwd_qtrs_max=40,
               bkwd_qtrs_max=12, usgdp_end_date='today',
                download_from_internet=True, html_show=True):
     '''
@@ -411,7 +411,7 @@ def usgdp_npp(frwd_qtrs_main=10, bkwd_qtrs_main=3, frwd_qtrs_max=28,
                    alpha=0.7, muted_alpha=0.15)
 
     # Dashed vertical line at the peak PAYEMS value period
-    fig.line(x=[0.0, 0.0], y=[-0.5, 2.0], color='black', line_width=2,
+    fig.line(x=[0.0, 0.0], y=[-0.5, 2.4], color='black', line_width=2,
              line_dash='dashed', alpha=0.5)
 
     # Dashed horizontal line at PAYEMS as fraction of peak equals 1
