@@ -1,6 +1,6 @@
 '''
-This module downloads the U.S. real GDP seasonally adjusted
-(GDPC1) quarterly time series from the St. Louis Federal Reserve's FRED system
+This module downloads the U.S. real GDP seasonally adjusted (GDPC1, billions
+of chained 2012 dollars, at annual rate) quarterly time series from the St. Louis Federal Reserve's FRED system
 (https://fred.stlouisfed.org/series/GDPC1) or loads it from this directory and
 organizes it into 15 series, one for each of the last 15 recessions--from the
 current 2020 Coronavirus recession to the Great Depression of 1929. It then
@@ -103,42 +103,41 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
         filename_basic = ('data/usgdp_' + end_date_str2 + '.csv')
         filename_full = ('data/usgdp_pk_' + end_date_str2 + '.csv')
         usgdp_df.to_csv(filename_basic, index=False)
-        # Merge in U.S. annual real GDP (GDPCA, not seasonally adjusted) 1929-
-        # 1947. Date values for annual data are set to July 1 of that year.
-        start_date_ann = dt.datetime(1929, 1, 1)
-        end_date_ann = dt.datetime(1947, 12, 31)
-        usgdp_ann_df = pddr.fred.FredReader(symbols='GDPCA',
-                                            start=start_date_ann,
-                                            end=end_date_ann).read()
-        usgdp_ann_df = pd.DataFrame(usgdp_ann_df).sort_index()  # Sort old->new
-        usgdp_ann_df = usgdp_ann_df.reset_index(level=['DATE'])
-        usgdp_ann_df = usgdp_ann_df.rename(columns={'DATE': 'Date'})
-
-        usempl_df = usempl_df.append(usempl_ann_df, ignore_index=True)
-        usempl_df = usempl_df.sort_values(by='Date')
-        usempl_df = usempl_df.reset_index(drop=True)
-        usempl_df.to_csv(filename_basic, index=False)
+        # Merge in U.S. annual real GDP (GDPCA, not seasonally adjusted,
+        # billions of 2012 chained dollars, annual rate) 1929-1946. Earliest
+        # year from FRED for this series is 1929, so cannot do pre-recession.
+        # Date values for annual data are set to July 1 of that year.
+        filename_annual = ('data/usgdp_annual_1929-1946.csv')
+        ann_data_file_path = os.path.join(cur_path, filename_annual)
+        usgdp_ann_df = \
+            pd.read_csv(ann_data_file_path, names=['Date', 'GDPC1'],
+                        parse_dates=['Date'], skiprows=1,
+                        na_values=['.', 'na', 'NaN'])
+        usgdp_df = usgdp_df.append(usgdp_ann_df, ignore_index=True)
+        usgdp_df = usgdp_df.sort_values(by='Date')
+        usgdp_df = usgdp_df.reset_index(drop=True)
+        usgdp_df.to_csv(filename_basic, index=False)
         # Add other months to annual data 1919-01-01 to 1938-12-01 and fill in
         # artificial employment data by cubic spline interpolation
-        months_df = \
-            pd.DataFrame(pd.date_range('1919-01-01', '1938-12-01', freq='MS'),
+        quarters_df = \
+            pd.DataFrame(pd.date_range('1929-07-01', '1946-10-01', freq='QS'),
                          columns=['Date'])
-        usempl_df = pd.merge(usempl_df, months_df, left_on='Date',
-                             right_on='Date', how='outer')
-        usempl_df = usempl_df.sort_values(by='Date')
-        usempl_df = usempl_df.reset_index(drop=True)
-        usempl_df['PAYEMS'].iloc[:242] = \
-            usempl_df['PAYEMS'].iloc[:242].interpolate(method='cubic')
+        usgdp_df = pd.merge(usgdp_df, quarters_df, left_on='Date',
+                            right_on='Date', how='outer')
+        usgdp_df = usgdp_df.sort_values(by='Date')
+        usgdp_df = usgdp_df.reset_index(drop=True)
+        usgdp_df['GDPC1'].iloc[:71] = \
+            usgdp_df['GDPC1'].iloc[:71].interpolate(method='cubic')
     else:
         # Import the data as pandas DataFrame
         end_date_str2 = end_date_str
         data_file_path = os.path.join(cur_path, filename_basic)
-        usempl_df = pd.read_csv(data_file_path, names=['Date', 'PAYEMS'],
+        usgdp_df = pd.read_csv(data_file_path, names=['Date', 'GDPC1'],
                                 parse_dates=['Date'], skiprows=1,
                                 na_values=['.', 'na', 'NaN'])
-        usempl_df = usempl_df.dropna()
+        usgdp_df = usgdp_df.dropna()
 
-    print('End date of U.S. employment series is',
+    print('End date of U.S. real GDP series is',
           end_date.strftime('%Y-%m-%d'))
 
     # Set recession-specific parameters
@@ -181,74 +180,73 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
                          'Mar 2001', 'Dec 2007', 'Feb 2020']
 
     maxdate_rng_lst = [('1929-7-1', '1929-10-1'),
-                       ('1937-7-1', '1937-7-1'),
-                       ('1945-1-1', '1945-3-1'),
-                       ('1948-9-1', '1949-1-1'),
-                       ('1953-6-1', '1953-8-1'),
-                       ('1957-7-1', '1957-9-1'),
-                       ('1960-3-1', '1960-5-1'),
-                       ('1969-11-1', '1970-3-1'),
-                       ('1973-10-1', '1974-7-1'),
-                       ('1979-12-1', '1980-3-1'),
-                       ('1981-6-1', '1981-8-1'),
-                       ('1990-6-1', '1991-8-1'),
-                       ('2001-2-1', '2001-4-1'),
-                       ('2007-11-1', '2008-1-1'),
-                       ('2020-1-1', '2020-3-1')]
+                       ('1937-4-1', '1937-10-1'),
+                       ('1945-1-1', '1945-4-1'),
+                       ('1948-7-1', '1949-1-1'),
+                       ('1953-4-1', '1953-7-1'),
+                       ('1957-7-1', '1957-10-1'),
+                       ('1960-1-1', '1960-4-1'),
+                       ('1969-7-1', '1970-1-1'),
+                       ('1973-10-1', '1974-1-1'),
+                       ('1979-10-1', '1980-4-1'),
+                       ('1981-4-1', '1981-10-1'),
+                       ('1990-4-1', '1991-10-1'),
+                       ('2001-1-1', '2001-7-1'),
+                       ('2007-7-1', '2008-1-1'),
+                       ('2019-10-1', '2020-4-1')]
 
     # Create normalized peak series for each recession
-    usempl_pk = \
-        pd.DataFrame(np.arange(-bkwd_mths_max, frwd_mths_max + 1, dtype=int),
-                     columns=['mths_frm_peak'])
-    usempl_pk_long = usempl_df.copy()
+    usgdp_pk = \
+        pd.DataFrame(np.arange(-bkwd_qtrs_max, frwd_qtrs_max + 1, dtype=int),
+                     columns=['qtrs_frm_peak'])
+    usgdp_pk_long = usgdp_df.copy()
     peak_vals = []
     peak_dates = []
     for i, maxdate_rng in enumerate(maxdate_rng_lst):
-        # Identify peak closing value within two months (with only 2
-        # exceptions) of the beginning month of the recession
+        # Identify peak real GDP value within one quarter of beginning moth of
+        # the recession
         peak_val = \
-            usempl_df['PAYEMS'][(usempl_df['Date'] >= maxdate_rng[0]) &
-                                (usempl_df['Date'] <= maxdate_rng[1])].max()
+            usgdp_df['GDPC1'][(usgdp_df['Date'] >= maxdate_rng[0]) &
+                                (usgdp_df['Date'] <= maxdate_rng[1])].max()
         peak_vals.append(peak_val)
-        usempl_dv_pk_name = 'usempl_dv_pk' + str(i)
-        usempl_pk_long[usempl_dv_pk_name] = (usempl_pk_long['PAYEMS'] /
-                                             peak_val)
-        # Identify date of peak PAYEMS value within two months (with
-        # only 2 exceptions) of the beginning month of the recession
+        usgdp_dv_pk_name = 'usgdp_dv_pk' + str(i)
+        usgdp_pk_long[usgdp_dv_pk_name] = usgdp_pk_long['GDPC1'] / peak_val
+        # Identify date of peak real GDP value within one quarter of the
+        # beginning month of the recession
         peak_date = \
-            usempl_df['Date'][(usempl_df['Date'] >= maxdate_rng[0]) &
-                              (usempl_df['Date'] <= maxdate_rng[1]) &
-                              (usempl_df['PAYEMS'] == peak_val)].max()
+            usgdp_df['Date'][(usgdp_df['Date'] >= maxdate_rng[0]) &
+                              (usgdp_df['Date'] <= maxdate_rng[1]) &
+                              (usgdp_df['GDPC1'] == peak_val)].max()
         peak_dates.append(peak_date.strftime('%Y-%m-%d'))
-        mths_frm_pk_name = 'mths_frm_pk' + str(i)
-        usempl_pk_long[mths_frm_pk_name] = \
-            ((usempl_pk_long['Date'].dt.year - peak_date.year) * 12 +
-             (usempl_pk_long['Date'].dt.month - peak_date.month))
+        qtrs_frm_pk_name = 'qtrs_frm_pk' + str(i)
+        usgdp_pk_long[qtrs_frm_pk_name] = \
+            ((usgdp_pk_long['Date'].dt.year - peak_date.year) * 4 +
+             ((usgdp_pk_long['Date'].dt.month - peak_date.month) / 3))
         # usempl_pk_long[mths_frm_pk_name] = (usempl_pk_long['Date'] -
         #                                     peak_date).dt.years
-        print('peak_val ' + str(i) + ' is', peak_val, 'on date',
+        print('peak_val ' + str(i) + ' is', peak_val, 'on quarter',
               peak_date.strftime('%Y-%m-%d'), '(Beg. rec. month:',
               rec_beg_yrmth_lst[i], ')')
-        # I need to merge the data into this new usempl_pk DataFrame so that
-        # mths_frm_peak variable is shared across the dataframe
-        usempl_pk = \
-            pd.merge(usempl_pk,
-                     usempl_pk_long[[mths_frm_pk_name, 'Date', 'PAYEMS',
-                                     usempl_dv_pk_name]],
-                     left_on='mths_frm_peak', right_on=mths_frm_pk_name,
+        # I need to merge the data into this new usgdp_pk DataFrame so that
+        # qtrs_frm_peak variable is shared across the dataframe
+        usgdp_pk = \
+            pd.merge(usgdp_pk,
+                     usgdp_pk_long[[qtrs_frm_pk_name, 'Date', 'GDPC1',
+                                    usgdp_dv_pk_name]],
+                     left_on='qtrs_frm_peak', right_on=qtrs_frm_pk_name,
                      how='left')
-        usempl_pk.drop(columns=[mths_frm_pk_name], inplace=True)
-        usempl_pk.rename(
-            columns={'Date': f'Date{i}', 'PAYEMS': f'PAYEMS{i}'}, inplace=True)
+        usgdp_pk.drop(columns=[qtrs_frm_pk_name], inplace=True)
+        usgdp_pk.rename(
+            columns={'Date': f'Date{i}', 'GDPC1': f'GDPC1{i}'}, inplace=True)
 
-    usempl_pk.to_csv(filename_full, index=False)
+    usgdp_pk.to_csv(filename_full, index=False)
 
-    return (usempl_pk, end_date_str2, peak_vals, peak_dates, rec_label_yr_lst,
+    return (usgdp_pk, end_date_str2, peak_vals, peak_dates, rec_label_yr_lst,
             rec_label_yrmth_lst, rec_beg_yrmth_lst, maxdate_rng_lst)
 
 
-def usempl_npp(frwd_mths_main=12, bkwd_mths_main=2, frwd_mths_max=135,
-               bkwd_mths_max=48, usempl_end_date='today',
+def usgdp_npp(frwd_qtrs_main=10, bkwd_qtrs_main=3, frwd_qtrs_max=28,
+              bkwd_qtrs_max=12, usgdp_end_date='today',
                download_from_internet=True, html_show=True):
     '''
     This function creates the HTML and JavaScript code for the dynamic
@@ -257,28 +255,28 @@ def usempl_npp(frwd_mths_main=12, bkwd_mths_main=2, frwd_mths_max=135,
     most recent COVID-19 recession (Feb. 2020 - present).
 
     Args:
-        frwd_mths_main (int): number of months forward from the peak to plot in
-            the default main window of the visualization
-        bkwd_mths_maim (int): number of months backward from the peak to plot
+        frwd_qtrs_main (int): number of quarterss forward from the peak to plot
             in the default main window of the visualization
-        frwd_mths_max (int): maximum number of months forward from the peak to
-            allow for the plot, to be seen by zooming out
-        bkwd_mths_max (int): maximum number of months backward from the peak to
-            allow for the plot, to be seen by zooming out
-        usempl_end_date (str): either 'today' or the end date of PAYEMS time
+        bkwd_qtrs_maim (int): number of quarters backward from the peak to plot
+            in the default main window of the visualization
+        frwd_qtrs_max (int): maximum number of quarters forward from the peak
+            to allow for the plot, to be seen by zooming out
+        bkwd_qtrs_max (int): maximum number of quarters backward from the peak
+            to allow for the plot, to be seen by zooming out
+        usgdp_end_date (str): either 'today' or the end date of GDPC1 time
             series in 'YYYY-mm-dd' format
         download_from_internet (bool): =True if download data from St. Louis
             Federal Reserve's FRED system
-            (https://fred.stlouisfed.org/series/PAYEMS), otherwise read data in
+            (https://fred.stlouisfed.org/series/GDPC1), otherwise read data in
             from local directory
         html_show (bool): =True if open dynamic visualization in browser once
             created
 
     Other functions and files called by this function:
-        get_usempl_data()
+        get_usgdp_data()
 
     Files created by this function:
-       images/usempl_[yyyy-mm-dd].html
+       images/usgdp_[yyyy-mm-dd].html
 
     Returns: fig, end_date_str
     '''
@@ -289,126 +287,126 @@ def usempl_npp(frwd_mths_main=12, bkwd_mths_main=2, frwd_mths_max=135,
     if not os.access(image_dir, os.F_OK):
         os.makedirs(image_dir)
 
-    if usempl_end_date == 'today':
+    if usgdp_end_date == 'today':
         end_date = dt.date.today()  # Go through today
     else:
-        end_date = dt.datetime.strptime(usempl_end_date, '%Y-%m-%d')
+        end_date = dt.datetime.strptime(usgdp_end_date, '%Y-%m-%d')
 
     end_date_str = end_date.strftime('%Y-%m-%d')
 
     # Set main window and total data limits for monthly plot
-    frwd_mths_main = int(frwd_mths_main)
-    bkwd_mths_main = int(bkwd_mths_main)
-    frwd_mths_max = int(frwd_mths_max)
-    bkwd_mths_max = int(bkwd_mths_max)
+    frwd_qtrs_main = int(frwd_qtrs_main)
+    bkwd_qtrs_main = int(bkwd_qtrs_main)
+    frwd_qtrs_max = int(frwd_qtrs_max)
+    bkwd_qtrs_max = int(bkwd_qtrs_max)
 
-    (usempl_pk, end_date_str2, peak_vals, peak_dates, rec_label_yr_lst,
+    (usgdp_pk, end_date_str2, peak_vals, peak_dates, rec_label_yr_lst,
         rec_label_yrmth_lst, rec_beg_yrmth_lst, maxdate_rng_lst) = \
-        get_usempl_data(frwd_mths_max, bkwd_mths_max, end_date_str,
-                        download_from_internet)
+        get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
+                       download_from_internet)
     if end_date_str2 != end_date_str:
-        print('PAYEMS data downloaded on ' + end_date_str + ' has most ' +
-              'recent PAYEMS data month of ' + end_date_str2 + '.')
+        print('GDPC1 data downloaded on ' + end_date_str + ' has most ' +
+              'recent GDPC1 data quarter of ' + end_date_str2 + '.')
     end_date2 = dt.datetime.strptime(end_date_str2, '%Y-%m-%d')
 
     rec_cds_list = []
     min_main_val_lst = []
     max_main_val_lst = []
     for i in range(15):
-        usempl_pk_rec = \
-            usempl_pk[['mths_frm_peak', f'Date{i}', f'PAYEMS{i}',
-                       f'usempl_dv_pk{i}']].dropna()
-        usempl_pk_rec.rename(
-            columns={f'Date{i}': 'Date', f'PAYEMS{i}': 'PAYEMS',
-                     f'usempl_dv_pk{i}': 'usempl_dv_pk'}, inplace=True)
-        rec_cds_list.append(ColumnDataSource(usempl_pk_rec))
-        # Find minimum and maximum usempl_dv_pk values as inputs to main plot
+        usgdp_pk_rec = \
+            usgdp_pk[['qtrs_frm_peak', f'Date{i}', f'GDPC1{i}',
+                      f'usgdp_dv_pk{i}']].dropna()
+        usgdp_pk_rec.rename(
+            columns={f'Date{i}': 'Date', f'GDPC1{i}': 'GDPC1',
+                     f'usgdp_dv_pk{i}': 'usgdp_dv_pk'}, inplace=True)
+        rec_cds_list.append(ColumnDataSource(usgdp_pk_rec))
+        # Find minimum and maximum usgdp_dv_pk values as inputs to main plot
         # frame size
         min_main_val_lst.append(
-            usempl_pk_rec['usempl_dv_pk'][
-                (usempl_pk_rec['mths_frm_peak'] >= -bkwd_mths_main) &
-                (usempl_pk_rec['mths_frm_peak'] <= frwd_mths_main)].min())
+            usgdp_pk_rec['usgdp_dv_pk'][
+                (usgdp_pk_rec['qtrs_frm_peak'] >= -bkwd_qtrs_main) &
+                (usgdp_pk_rec['qtrs_frm_peak'] <= frwd_qtrs_main)].min())
         max_main_val_lst.append(
-            usempl_pk_rec['usempl_dv_pk'][
-                (usempl_pk_rec['mths_frm_peak'] >= -bkwd_mths_main) &
-                (usempl_pk_rec['mths_frm_peak'] <= frwd_mths_main)].max())
+            usgdp_pk_rec['usgdp_dv_pk'][
+                (usgdp_pk_rec['qtrs_frm_peak'] >= -bkwd_qtrs_main) &
+                (usgdp_pk_rec['qtrs_frm_peak'] <= frwd_qtrs_main)].max())
 
-    # Create Bokeh plot of PAYEMS normalized peak plot figure
-    fig_title = 'Progression of PAYEMS in last 15 recessions'
-    filename = ('images/usempl_npp_' + end_date_str2 + '.html')
+    # Create Bokeh plot of GDPC1 normalized peak plot figure
+    fig_title = 'Progression of GCPC1 in last 15 recessions'
+    filename = ('images/usgdp_npp_' + end_date_str2 + '.html')
     output_file(filename, title=fig_title)
 
     # Format the tooltip
     tooltips = [('Date', '@Date{%F}'),
-                ('Months from peak', '$x{0.}'),
-                ('Employment', '@PAYEMS{0,0.},000'),
-                ('Fraction of peak', '@usempl_dv_pk{0.0 %}')]
+                ('Quarters from peak', '$x{0.}'),
+                ('Real GDP', '$@GDPC1{0,0.}B'),
+                ('Fraction of peak', '@usgdp_dv_pk{0.0 %}')]
 
-    # Solve for minimum and maximum PAYEMS/Peak values in monthly main display
+    # Solve for minimum and maximum GDPC1/Peak values in quarterly main display
     # window in order to set the appropriate xrange and yrange
     min_main_val = min(min_main_val_lst)
     max_main_val = max(max_main_val_lst)
 
     datarange_main_vals = max_main_val - min_main_val
-    datarange_main_mths = int(frwd_mths_main + bkwd_mths_main)
+    datarange_main_qtrs = int(frwd_qtrs_main + bkwd_qtrs_main)
     fig_buffer_pct = 0.10
     fig = figure(plot_height=500,
                  plot_width=800,
-                 x_axis_label='Months from Peak',
-                 y_axis_label='PAYEMS as fraction of Peak',
+                 x_axis_label='Quarters from Peak',
+                 y_axis_label='Real GDP as fraction of Peak',
                  y_range=(min_main_val - fig_buffer_pct * datarange_main_vals,
                           max_main_val + fig_buffer_pct * datarange_main_vals),
-                 x_range=((-bkwd_mths_main -
-                           fig_buffer_pct * datarange_main_mths),
-                          (frwd_mths_main +
-                           fig_buffer_pct * datarange_main_mths)),
+                 x_range=((-bkwd_qtrs_main -
+                           fig_buffer_pct * datarange_main_qtrs),
+                          (frwd_qtrs_main +
+                           fig_buffer_pct * datarange_main_qtrs)),
                  tools=['save', 'zoom_in', 'zoom_out', 'box_zoom',
                         'pan', 'undo', 'redo', 'reset', 'hover', 'help'],
                  toolbar_location='left')
     fig.title.text_font_size = '18pt'
     fig.toolbar.logo = None
-    l0 = fig.line(x='mths_frm_peak', y='usempl_dv_pk', source=rec_cds_list[0],
+    l0 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk', source=rec_cds_list[0],
                   color='blue', line_width=5, alpha=0.7, muted_alpha=0.15)
-    l1 = fig.line(x='mths_frm_peak', y='usempl_dv_pk', source=rec_cds_list[1],
+    l1 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk', source=rec_cds_list[1],
                   color=Category20[13][0], line_width=2, alpha=0.7,
                   muted_alpha=0.15)
-    l2 = fig.line(x='mths_frm_peak', y='usempl_dv_pk', source=rec_cds_list[2],
+    l2 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk', source=rec_cds_list[2],
                   color=Category20[13][1], line_width=2, alpha=0.7,
                   muted_alpha=0.15)
-    l3 = fig.line(x='mths_frm_peak', y='usempl_dv_pk', source=rec_cds_list[3],
+    l3 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk', source=rec_cds_list[3],
                   color=Category20[13][2], line_width=2,
                   alpha=0.7, muted_alpha=0.15)
-    l4 = fig.line(x='mths_frm_peak', y='usempl_dv_pk', source=rec_cds_list[4],
+    l4 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk', source=rec_cds_list[4],
                   color=Category20[13][3], line_width=2, alpha=0.7,
                   muted_alpha=0.15)
-    l5 = fig.line(x='mths_frm_peak', y='usempl_dv_pk', source=rec_cds_list[5],
+    l5 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk', source=rec_cds_list[5],
                   color=Category20[13][4], line_width=2, alpha=0.7,
                   muted_alpha=0.15)
-    l6 = fig.line(x='mths_frm_peak', y='usempl_dv_pk', source=rec_cds_list[6],
+    l6 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk', source=rec_cds_list[6],
                   color=Category20[13][5], line_width=2, alpha=0.7,
                   muted_alpha=0.15)
-    l7 = fig.line(x='mths_frm_peak', y='usempl_dv_pk', source=rec_cds_list[7],
+    l7 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk', source=rec_cds_list[7],
                   color=Category20[13][6], line_width=2, alpha=0.7,
                   muted_alpha=0.15)
-    l8 = fig.line(x='mths_frm_peak', y='usempl_dv_pk', source=rec_cds_list[8],
+    l8 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk', source=rec_cds_list[8],
                   color=Category20[13][7], line_width=2, alpha=0.7,
                   muted_alpha=0.15)
-    l9 = fig.line(x='mths_frm_peak', y='usempl_dv_pk', source=rec_cds_list[9],
+    l9 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk', source=rec_cds_list[9],
                   color=Category20[13][8], line_width=2, alpha=0.7,
                   muted_alpha=0.15)
-    l10 = fig.line(x='mths_frm_peak', y='usempl_dv_pk',
+    l10 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk',
                    source=rec_cds_list[10], color=Category20[13][9],
                    line_width=2, alpha=0.7, muted_alpha=0.15)
-    l11 = fig.line(x='mths_frm_peak', y='usempl_dv_pk',
+    l11 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk',
                    source=rec_cds_list[11], color=Category20[13][10],
                    line_width=2, alpha=0.7, muted_alpha=0.15)
-    l12 = fig.line(x='mths_frm_peak', y='usempl_dv_pk',
+    l12 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk',
                    source=rec_cds_list[12], color=Category20[13][11],
                    line_width=2, alpha=0.7, muted_alpha=0.15)
-    l13 = fig.line(x='mths_frm_peak', y='usempl_dv_pk',
+    l13 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk',
                    source=rec_cds_list[13], color=Category20[13][12],
                    line_width=2, alpha=0.7, muted_alpha=0.15)
-    l14 = fig.line(x='mths_frm_peak', y='usempl_dv_pk',
+    l14 = fig.line(x='qtrs_frm_peak', y='usgdp_dv_pk',
                    source=rec_cds_list[14], color='black', line_width=5,
                    alpha=0.7, muted_alpha=0.15)
 
@@ -417,7 +415,7 @@ def usempl_npp(frwd_mths_main=12, bkwd_mths_main=2, frwd_mths_max=135,
              line_dash='dashed', alpha=0.5)
 
     # Dashed horizontal line at PAYEMS as fraction of peak equals 1
-    fig.line(x=[-bkwd_mths_max, frwd_mths_max], y=[1.0, 1.0],
+    fig.line(x=[-bkwd_qtrs_max, frwd_qtrs_max], y=[1.0, 1.0],
              color='black', line_width=2, line_dash='dashed', alpha=0.5)
 
     # # Create the tick marks for the x-axis and set x-axis labels
@@ -473,8 +471,8 @@ def usempl_npp(frwd_mths_main=12, bkwd_mths_main=2, frwd_mths_max=135,
     #                      background_fill_alpha=1.0))
 
     # Add title and subtitle to the plot
-    fig_title2 = 'Progression of U.S. total nonfarm employment'
-    fig_title3 = '(PAYEMS, seasonally adjusted) in last 15 recessions'
+    fig_title2 = 'Progression of U.S. Real GDP in last 15 recessions'
+    fig_title3 = '(GDPC1, seasonally adjusted, $B 2012 chained)'
     fig.add_layout(Title(text=fig_title3, text_font_style='bold',
                          text_font_size='16pt', align='center'), 'above')
     fig.add_layout(Title(text=fig_title2, text_font_style='bold',
@@ -483,7 +481,7 @@ def usempl_npp(frwd_mths_main=12, bkwd_mths_main=2, frwd_mths_max=135,
     # Add source text below figure
     updated_date_str = end_date.strftime('%B %-d, %Y')
     fig.add_layout(Title(text='Source: Richard W. Evans (@RickEcon), ' +
-                              'historical PAYEMS data from FRED and BLS, ' +
+                              'historical GDPC1 data from FRED, ' +
                               'updated ' + updated_date_str + '.',
                          align='left',
                          text_font_size='3mm',
@@ -503,4 +501,4 @@ def usempl_npp(frwd_mths_main=12, bkwd_mths_main=2, frwd_mths_max=135,
 
 if __name__ == '__main__':
     # execute only if run as a script
-    fig, end_date_str = usempl_npp()
+    fig, end_date_str = usgdp_npp()
