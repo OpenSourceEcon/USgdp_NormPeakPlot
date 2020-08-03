@@ -58,5 +58,5 @@ This dynamic visualization allows the user to customize some different views and
 ## 3. Contributing to this visualization code
 If you wish to improve or enhance this code or if you find errors or bugs, please consider the following ways to contribute to this project.
 * Browse the repository [Issues](https://github.com/OpenSourceEcon/USgdp_NormPeakPlot/issues) for known areas that need attention.
-* Submit questions or suggestions by submitting a new issue in the repository [Issues](https://github.com/OpenSourceEcon/USgdp_NormPeakPlot/issues).
+* Submit questions, suggestions, or changes by submitting a new issue in the repository [Issues](https://github.com/OpenSourceEcon/USgdp_NormPeakPlot/issues).
 * Submit a pull request with your proposed changes.
