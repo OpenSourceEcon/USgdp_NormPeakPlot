@@ -14,7 +14,7 @@ import datetime as dt
 # import os
 # import pathlib
 # import runpy
-import usgdp_npp_bokeh as usempl
+import usgdp_npp_bokeh as usgdp
 
 
 # Create function to validate datetime text
