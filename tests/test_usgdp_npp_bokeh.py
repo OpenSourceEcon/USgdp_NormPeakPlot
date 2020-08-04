@@ -14,7 +14,7 @@ import datetime as dt
 # import os
 # import pathlib
 # import runpy
-import usgdp_npp_bokeh as usempl
+import usgdp_npp_bokeh as usgdp
 
 
 # Create function to validate datetime text
@@ -44,7 +44,7 @@ def validate(date_text):
 @pytest.mark.parametrize('bkwd_qtrs_main', [3])
 @pytest.mark.parametrize('frwd_qtrs_max', [40])
 @pytest.mark.parametrize('bkwd_qtrs_max', [12])
-@pytest.mark.parametrize('usgdp_end_date', ['today', '2020-06-01'])
+@pytest.mark.parametrize('usgdp_end_date', ['today', '2020-04-01'])
 @pytest.mark.parametrize('download_from_internet', [True, False])
 @pytest.mark.parametrize('html_show', [False])
 def test_html_fig(frwd_qtrs_main, bkwd_qtrs_main, frwd_qtrs_max, bkwd_qtrs_max,

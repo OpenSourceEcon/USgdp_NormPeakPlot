@@ -116,7 +116,6 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
         usgdp_df = usgdp_df.append(usgdp_ann_df, ignore_index=True)
         usgdp_df = usgdp_df.sort_values(by='Date')
         usgdp_df = usgdp_df.reset_index(drop=True)
-        usgdp_df.to_csv(filename_basic, index=False)
         # Add other months to annual data 1919-01-01 to 1938-12-01 and fill in
         # artificial employment data by cubic spline interpolation
         quarters_df = \
@@ -128,6 +127,7 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
         usgdp_df = usgdp_df.reset_index(drop=True)
         usgdp_df['GDPC1'].iloc[:71] = \
             usgdp_df['GDPC1'].iloc[:71].interpolate(method='cubic')
+        usgdp_df.to_csv(filename_basic, index=False)
     else:
         # Import the data as pandas DataFrame
         end_date_str2 = end_date_str
