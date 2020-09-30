@@ -1,5 +1,5 @@
 [![OSE Lab cataloged](https://img.shields.io/badge/OSE%20Lab-catalogued-critical)](https://www.oselab.org/gallery)
-[![Python 3.8.3+](https://img.shields.io/badge/python-3.8.3%2B-blue.svg)](https://www.python.org/downloads/release/python-383/)
+[![Python 3.8.2+](https://img.shields.io/badge/python-3.8.2%2B-blue.svg)](https://www.python.org/downloads/release/python-382/)
 [![Build Status](https://travis-ci.org/OpenSourceEcon/USgdp_NormPeakPlot.svg?branch=master)](https://travis-ci.org/OpenSourceEcon/USgdp_NormPeakPlot)
 [![codecov](https://codecov.io/gh/OpenSourceEcon/USgdp_NormPeakPlot/branch/master/graph/badge.svg)](https://codecov.io/gh/OpenSourceEcon/USgdp_NormPeakPlot)
 
