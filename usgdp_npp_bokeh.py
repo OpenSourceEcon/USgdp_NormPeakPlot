@@ -1,6 +1,7 @@
 '''
 This module downloads the U.S. real GDP seasonally adjusted (GDPC1, billions
-of chained 2012 dollars, at annual rate) quarterly time series from the St. Louis Federal Reserve's FRED system
+of chained 2012 dollars, at annual rate) quarterly time series from the St.
+Louis Federal Reserve's FRED system
 (https://fred.stlouisfed.org/series/GDPC1) or loads it from this directory and
 organizes it into 15 series, one for each of the last 15 recessions--from the
 current 2020 Coronavirus recession to the Great Depression of 1929. It then
@@ -156,7 +157,7 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
          '1990-1991',  # (Jul 1990 - Mar 1991)
          '2001',       # (Mar 2001 - Nov 2001)
          '2007-2009',  # (Dec 2007 - Jun 2009) Great Recession
-         '2020-pres']  # (Feb 2020 - present) Coronavirus recession
+         '2020-2020']  # (Feb 2020 - Apr 2020) Coronavirus recession
 
     rec_label_yrmth_lst = ['Aug 1929 - Mar 1933',  # Great Depression
                            'May 1937 - Jun 1938',
@@ -172,7 +173,7 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
                            'Jul 1990 - Mar 1991',
                            'Mar 2001 - Nov 2001',
                            'Dec 2007 - Jun 2009',  # Great Recession
-                           'Feb 2020 - present']  # Coronavirus recess'n
+                           'Feb 2020 - Apr 2020']  # Coronavirus recess'n
 
     rec_beg_yrmth_lst = ['Aug 1929', 'May 1937', 'Feb 1945', 'Nov 1948',
                          'Jul 1953', 'Aug 1957', 'Apr 1960', 'Dec 1969',
@@ -193,7 +194,7 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
                        ('1990-4-1', '1991-10-1'),
                        ('2001-1-1', '2001-7-1'),
                        ('2007-7-1', '2008-1-1'),
-                       ('2019-10-1', '2020-4-1')]
+                       ('2019-10-1', '2020-3-1')]
 
     # Create normalized peak series for each recession
     usgdp_pk = \
