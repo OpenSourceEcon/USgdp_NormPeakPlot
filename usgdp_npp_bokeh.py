@@ -246,7 +246,7 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
             rec_label_yrmth_lst, rec_beg_yrmth_lst, maxdate_rng_lst)
 
 
-def usgdp_npp(frwd_qtrs_main=10, bkwd_qtrs_main=3, frwd_qtrs_max=40,
+def usgdp_npp(frwd_qtrs_main=11, bkwd_qtrs_main=3, frwd_qtrs_max=40,
               bkwd_qtrs_max=12, usgdp_end_date='today',
                download_from_internet=True, html_show=True):
     '''
