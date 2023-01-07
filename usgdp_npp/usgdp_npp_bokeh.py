@@ -21,6 +21,7 @@ import os
 from bokeh.io import output_file
 from bokeh.plotting import figure, show
 from bokeh.models import ColumnDataSource, Title, Legend, HoverTool
+
 # from bokeh.models import Label
 from bokeh.palettes import Category20
 
@@ -480,7 +481,14 @@ def usgdp_npp(frwd_qtrs_main=11, bkwd_qtrs_main=3, frwd_qtrs_max=40,
                          text_font_size='16pt', align='center'), 'above')
 
     # Add source text below figure
-    updated_date_str = end_date.strftime('%B %-d, %Y')
+    updated_date_str = (
+        end_date.strftime("%B")
+        + " "
+        + end_date.strftime("%d").lstrip("0")
+        + ", "
+        + end_date.strftime("%Y")
+    )
+    fig.ad
     fig.add_layout(Title(text='Source: Richard W. Evans (@RickEcon), ' +
                               'historical GDPC1 data from FRED, ' +
                               'updated ' + updated_date_str + '.',

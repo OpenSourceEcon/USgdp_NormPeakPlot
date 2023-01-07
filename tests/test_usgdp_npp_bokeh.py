@@ -11,32 +11,44 @@ Three main tests:
 
 import pytest
 import datetime as dt
-# import os
-# import pathlib
-# import runpy
-import usgdp_npp_bokeh as usgdp
+from usgdp_npp import usgdp_npp_bokeh as usgdp
 
 
 # Create function to validate datetime text
-
-
 def validate(date_text):
     try:
-        if date_text != dt.datetime.strptime(
-                            date_text, "%Y-%m-%d").strftime('%Y-%m-%d'):
+        if date_text != dt.datetime.strptime(date_text, "%Y-%m-%d").strftime(
+            "%Y-%m-%d"
+        ):
             raise ValueError
         return True
     except ValueError:
         return False
 
 
-# Test whether running the script of the module results in an html figure and
-# two datasets
-# def test_html_fig_script():
-#     script = pathlib.Path(__file__, '..',
-#                           'scripts').resolve().glob('usempl_npp_bokeh.py')
-#     runpy.run_path(script)
-#     assert fig
+# Test that get_usgdp_data() delivers the right structures and can download
+# the data from the internet
+def test_get_usempl_data(end_date_str="2022-11-15"):
+    data_tuple = usempl.get_usempl_data(end_date_str=end_date_str)
+    assert len(data_tuple) == 8
+    (
+        usempl_pk,
+        end_date_str2,
+        peak_vals,
+        peak_dates,
+        rec_label_yr_lst,
+        rec_label_yrmth_lst,
+        rec_beg_yrmth_lst,
+        maxdate_rng_lst,
+    ) = data_tuple
+    assert usempl_pk.to_numpy().shape == (184, 46)
+    assert end_date_str2 == "2022-11-01"
+    assert len(peak_vals) == 15
+    assert len(peak_dates) == 15
+    assert len(rec_label_yr_lst) == 15
+    assert len(rec_label_yrmth_lst) == 15
+    assert len(rec_beg_yrmth_lst) == 15
+    assert len(maxdate_rng_lst) == 15
 
 # Test that usempl_npp() function returns html figure and valid string and
 # saves html figure file and two csv files.
