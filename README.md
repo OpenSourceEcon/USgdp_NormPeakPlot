@@ -1,6 +1,7 @@
 [![OSE Lab cataloged](https://img.shields.io/badge/OSE%20Lab-catalogued-critical)](https://www.oselab.org/gallery)
-[![Python 3.8.2+](https://img.shields.io/badge/python-3.8.2%2B-blue.svg)](https://www.python.org/downloads/release/python-382/)
-[![Build Status](https://travis-ci.org/OpenSourceEcon/USgdp_NormPeakPlot.svg?branch=master)](https://travis-ci.org/OpenSourceEcon/USgdp_NormPeakPlot)
+[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3108/)
+![example event parameter](https://github.com/OpenSourceEcon/USgdp_NormPeakPlot/actions/workflows/build_and_test.yml/badge.svg)
+![example event parameter](https://github.com/OpenSourceEcon/USgdp_NormPeakPlot/actions/workflows/check_black.yml/badge.svg)
 [![codecov](https://codecov.io/gh/OpenSourceEcon/USgdp_NormPeakPlot/branch/master/graph/badge.svg)](https://codecov.io/gh/OpenSourceEcon/USgdp_NormPeakPlot)
 
 # Normalized Peak Plot of U.S. Real Gross Domestic Product (GDPC1)
