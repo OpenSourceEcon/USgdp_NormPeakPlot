@@ -22,7 +22,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
-          activate-environment: usempl-npp-dev
+          activate-environment: usgdp-npp-dev
           environment-file: environment.yml
           python-version: ${{ matrix.python-version }}
           auto-activate-base: false
