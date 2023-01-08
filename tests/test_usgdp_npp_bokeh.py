@@ -1,5 +1,5 @@
 """
-Tests of usgdp_npp_bokey.py module
+Tests of usgdp_npp_bokeh.py module
 
 Three main tests:
 * make sure that running the module as a script python usgdp_npp_bokeh.py
