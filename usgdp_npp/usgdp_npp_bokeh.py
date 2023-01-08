@@ -88,8 +88,8 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
     if not os.access(data_dir, os.F_OK):
         os.makedirs(data_dir)
 
-    filename_basic = ('data/usgdp_' + end_date_str + '.csv')
-    filename_full = ('data/usgdp_pk_' + end_date_str + '.csv')
+    filename_basic = ('usgdp_' + end_date_str + '.csv')
+    filename_full = ('usgdp_pk_' + end_date_str + '.csv')
 
     if download_from_internet:
         # Download the employment data directly from fred.stlouisfed.org
@@ -102,20 +102,20 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
         usgdp_df = usgdp_df.rename(columns={'DATE': 'Date'})
         end_date_str2 = usgdp_df['Date'].iloc[-1].strftime('%Y-%m-%d')
         end_date = dt.datetime.strptime(end_date_str2, '%Y-%m-%d')
-        filename_basic = ('data/usgdp_' + end_date_str2 + '.csv')
-        filename_full = ('data/usgdp_pk_' + end_date_str2 + '.csv')
-        usgdp_df.to_csv(filename_basic, index=False)
+        filename_basic = ('usgdp_' + end_date_str2 + '.csv')
+        filename_full = ('usgdp_pk_' + end_date_str2 + '.csv')
+        usgdp_df.to_csv(os.path.join(data_dir, filename_basic), index=False)
         # Merge in U.S. annual real GDP (GDPCA, not seasonally adjusted,
         # billions of 2012 chained dollars, annual rate) 1929-1946. Earliest
         # year from FRED for this series is 1929, so cannot do pre-recession.
         # Date values for annual data are set to July 1 of that year.
-        filename_annual = ('data/usgdp_annual_1929-1946.csv')
-        ann_data_file_path = os.path.join(cur_path, filename_annual)
+        filename_annual = ('usgdp_annual_1929-1946.csv')
+        ann_data_file_path = os.path.join(data_dir, filename_annual)
         usgdp_ann_df = \
             pd.read_csv(ann_data_file_path, names=['Date', 'GDPC1'],
                         parse_dates=['Date'], skiprows=1,
                         na_values=['.', 'na', 'NaN'])
-        usgdp_df = usgdp_df.append(usgdp_ann_df, ignore_index=True)
+        usgdp_df = pd.concat([usgdp_ann_df, usgdp_df], ignore_index=True)
         usgdp_df = usgdp_df.sort_values(by='Date')
         usgdp_df = usgdp_df.reset_index(drop=True)
         # Add other months to annual data 1919-01-01 to 1938-12-01 and fill in
@@ -129,11 +129,11 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
         usgdp_df = usgdp_df.reset_index(drop=True)
         usgdp_df['GDPC1'].iloc[:71] = \
             usgdp_df['GDPC1'].iloc[:71].interpolate(method='cubic')
-        usgdp_df.to_csv(filename_basic, index=False)
+        usgdp_df.to_csv(os.path.join(data_dir, filename_basic), index=False)
     else:
         # Import the data as pandas DataFrame
         end_date_str2 = end_date_str
-        data_file_path = os.path.join(cur_path, filename_basic)
+        data_file_path = os.path.join(data_dir, filename_basic)
         usgdp_df = pd.read_csv(data_file_path, names=['Date', 'GDPC1'],
                                 parse_dates=['Date'], skiprows=1,
                                 na_values=['.', 'na', 'NaN'])
@@ -241,7 +241,7 @@ def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
         usgdp_pk.rename(
             columns={'Date': f'Date{i}', 'GDPC1': f'GDPC1{i}'}, inplace=True)
 
-    usgdp_pk.to_csv(filename_full, index=False)
+    usgdp_pk.to_csv(os.path.join(data_dir, filename_full), index=False)
 
     return (usgdp_pk, end_date_str2, peak_vals, peak_dates, rec_label_yr_lst,
             rec_label_yrmth_lst, rec_beg_yrmth_lst, maxdate_rng_lst)
@@ -335,8 +335,8 @@ def usgdp_npp(frwd_qtrs_main=11, bkwd_qtrs_main=3, frwd_qtrs_max=40,
 
     # Create Bokeh plot of GDPC1 normalized peak plot figure
     fig_title = 'Progression of GCPC1 in last 15 recessions'
-    filename = ('images/usgdp_npp_' + end_date_str2 + '.html')
-    output_file(filename, title=fig_title)
+    filename = ('usgdp_npp_' + end_date_str2 + '.html')
+    output_file(os.path.join(image_dir, filename), title=fig_title)
 
     # Format the tooltip
     tooltips = [('Date', '@Date{%F}'),
@@ -488,7 +488,6 @@ def usgdp_npp(frwd_qtrs_main=11, bkwd_qtrs_main=3, frwd_qtrs_max=40,
         + ", "
         + end_date.strftime("%Y")
     )
-    fig.ad
     fig.add_layout(Title(text='Source: Richard W. Evans (@RickEcon), ' +
                               'historical GDPC1 data from FRED, ' +
                               'updated ' + updated_date_str + '.',
