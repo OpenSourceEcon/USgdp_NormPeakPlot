@@ -6,6 +6,7 @@ build/*
 dist/*
 _configtest.o.d
 *~
+*.egg-info/
 
 # LaTeX utility files
 *.aux
@@ -38,7 +39,7 @@ _configtest.o.d
 .vscode/*
 
 # Mac utility files
-.DS_Store
+*.DS_Store*
 
 # Jupyter notebook utility files
 *.ipynb_checkpoints*
