@@ -31,7 +31,8 @@ Define functions
 
 
 def get_usgdp_data(frwd_qtrs_max=40, bkwd_qtrs_max=12,
-                   end_date_str="2022-12-15", download_from_internet=True):
+                   end_date_str="2022-12-15", download_from_internet=True,
+                   save_data=True):
     '''
     This function either downloads or reads in the U.S. real GDP seasonally
     adjusted quarterly data series (GDPC1) and adds variables qtrs_frm_peak and
@@ -104,7 +105,8 @@ def get_usgdp_data(frwd_qtrs_max=40, bkwd_qtrs_max=12,
         end_date = dt.datetime.strptime(end_date_str2, '%Y-%m-%d')
         filename_basic = ('usgdp_' + end_date_str2 + '.csv')
         filename_full = ('usgdp_pk_' + end_date_str2 + '.csv')
-        usgdp_df.to_csv(os.path.join(data_dir, filename_basic), index=False)
+        if save_data:
+            usgdp_df.to_csv(os.path.join(data_dir, filename_basic), index=False)
         # Merge in U.S. annual real GDP (GDPCA, not seasonally adjusted,
         # billions of 2012 chained dollars, annual rate) 1929-1946. Earliest
         # year from FRED for this series is 1929, so cannot do pre-recession.
@@ -129,7 +131,8 @@ def get_usgdp_data(frwd_qtrs_max=40, bkwd_qtrs_max=12,
         usgdp_df = usgdp_df.reset_index(drop=True)
         usgdp_df['GDPC1'].iloc[:71] = \
             usgdp_df['GDPC1'].iloc[:71].interpolate(method='cubic')
-        usgdp_df.to_csv(os.path.join(data_dir, filename_basic), index=False)
+        if save_data:
+            usgdp_df.to_csv(os.path.join(data_dir, filename_basic), index=False)
     else:
         # Import the data as pandas DataFrame
         end_date_str2 = end_date_str
@@ -241,7 +244,8 @@ def get_usgdp_data(frwd_qtrs_max=40, bkwd_qtrs_max=12,
         usgdp_pk.rename(
             columns={'Date': f'Date{i}', 'GDPC1': f'GDPC1{i}'}, inplace=True)
 
-    usgdp_pk.to_csv(os.path.join(data_dir, filename_full), index=False)
+    if save_data:
+        usgdp_pk.to_csv(os.path.join(data_dir, filename_full), index=False)
 
     return (usgdp_pk, end_date_str2, peak_vals, peak_dates, rec_label_yr_lst,
             rec_label_yrmth_lst, rec_beg_yrmth_lst, maxdate_rng_lst)
@@ -249,7 +253,7 @@ def get_usgdp_data(frwd_qtrs_max=40, bkwd_qtrs_max=12,
 
 def usgdp_npp(frwd_qtrs_main=11, bkwd_qtrs_main=3, frwd_qtrs_max=40,
               bkwd_qtrs_max=12, usgdp_end_date='today',
-               download_from_internet=True, html_show=True):
+               download_from_internet=True, save_data=True, html_show=True):
     '''
     This function creates the HTML and JavaScript code for the dynamic
     visualization of the normalized peak plot of the last 15 recessions in the
@@ -305,7 +309,7 @@ def usgdp_npp(frwd_qtrs_main=11, bkwd_qtrs_main=3, frwd_qtrs_max=40,
     (usgdp_pk, end_date_str2, peak_vals, peak_dates, rec_label_yr_lst,
         rec_label_yrmth_lst, rec_beg_yrmth_lst, maxdate_rng_lst) = \
         get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
-                       download_from_internet)
+                       download_from_internet, save_data)
     if end_date_str2 != end_date_str:
         print('GDPC1 data downloaded on ' + end_date_str + ' has most ' +
               'recent GDPC1 data quarter of ' + end_date_str2 + '.')

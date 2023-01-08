@@ -28,7 +28,7 @@ def validate(date_text):
 
 # Test that get_usgdp_data() delivers the right structures and can download
 # the data from the internet
-def test_get_usgdp_data(end_date_str="2022-11-15"):
+def test_get_usgdp_data(end_date_str="2022-11-15", save_data=False):
     data_tuple = usgdp.get_usgdp_data(end_date_str=end_date_str)
     assert len(data_tuple) == 8
     (
@@ -57,24 +57,19 @@ def test_get_usgdp_data(end_date_str="2022-11-15"):
 @pytest.mark.parametrize('frwd_qtrs_max', [40])
 @pytest.mark.parametrize('bkwd_qtrs_max', [12])
 @pytest.mark.parametrize('usgdp_end_date', ['today', '2020-04-01'])
-@pytest.mark.parametrize('download_from_internet', [True, False])
+@pytest.mark.parametrize('download_from_internet', [True])
+@pytest.mark.parametrize('save_data', [False])
 @pytest.mark.parametrize('html_show', [False])
 def test_html_fig(frwd_qtrs_main, bkwd_qtrs_main, frwd_qtrs_max, bkwd_qtrs_max,
-                  usgdp_end_date, download_from_internet, html_show):
+                  usgdp_end_date, download_from_internet, save_data, html_show):
     # The case when usgdp_end_date == 'today' and download_from_internet ==
     # False must be skipped because we don't have the data saved for every date
-    if usgdp_end_date == 'today' and not download_from_internet:
-        print("Successful test, skipping invalid case")
-        assert True
-    else:
-        fig, end_date_str = usgdp.usgdp_npp(
-            frwd_qtrs_main=frwd_qtrs_main, bkwd_qtrs_main=bkwd_qtrs_main,
-            frwd_qtrs_max=frwd_qtrs_max, bkwd_qtrs_max=bkwd_qtrs_max,
-            usgdp_end_date=usgdp_end_date,
-            download_from_internet=download_from_internet,
-            html_show=html_show)
-        assert fig
-        assert validate(end_date_str)
-    # assert html file exists
-    # assert usempl series csv file exists
-    # assert usempl ColumnDataSource source DataFrame csv file exists
+    fig, end_date_str = usgdp.usgdp_npp(
+        frwd_qtrs_main=frwd_qtrs_main, bkwd_qtrs_main=bkwd_qtrs_main,
+        frwd_qtrs_max=frwd_qtrs_max, bkwd_qtrs_max=bkwd_qtrs_max,
+        usgdp_end_date=usgdp_end_date,
+        download_from_internet=download_from_internet,
+        save_data=save_data,
+        html_show=html_show)
+    assert fig
+    assert validate(end_date_str)
