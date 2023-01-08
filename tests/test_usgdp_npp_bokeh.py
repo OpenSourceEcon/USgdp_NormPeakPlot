@@ -1,4 +1,4 @@
-'''
+"""
 Tests of usgdp_npp_bokey.py module
 
 Three main tests:
@@ -7,7 +7,7 @@ Three main tests:
   directories
 * data files are created with both download_from_internet==True and
   download_from_internet==False.
-'''
+"""
 
 import pytest
 import datetime as dt
@@ -50,26 +50,38 @@ def test_get_usgdp_data(end_date_str="2022-11-15", save_data=False):
     assert len(rec_beg_yrmth_lst) == 15
     assert len(maxdate_rng_lst) == 15
 
+
 # Test that usempl_npp() function returns html figure and valid string and
 # saves html figure file and two csv files.
-@pytest.mark.parametrize('frwd_qtrs_main', [9])
-@pytest.mark.parametrize('bkwd_qtrs_main', [2])
-@pytest.mark.parametrize('frwd_qtrs_max', [40])
-@pytest.mark.parametrize('bkwd_qtrs_max', [12])
-@pytest.mark.parametrize('usgdp_end_date', ['today', '2020-04-01'])
-@pytest.mark.parametrize('download_from_internet', [True])
-@pytest.mark.parametrize('save_data', [False])
-@pytest.mark.parametrize('html_show', [False])
-def test_html_fig(frwd_qtrs_main, bkwd_qtrs_main, frwd_qtrs_max, bkwd_qtrs_max,
-                  usgdp_end_date, download_from_internet, save_data, html_show):
+@pytest.mark.parametrize("frwd_qtrs_main", [9])
+@pytest.mark.parametrize("bkwd_qtrs_main", [2])
+@pytest.mark.parametrize("frwd_qtrs_max", [40])
+@pytest.mark.parametrize("bkwd_qtrs_max", [12])
+@pytest.mark.parametrize("usgdp_end_date", ["today", "2020-04-01"])
+@pytest.mark.parametrize("download_from_internet", [True])
+@pytest.mark.parametrize("save_data", [False])
+@pytest.mark.parametrize("html_show", [False])
+def test_html_fig(
+    frwd_qtrs_main,
+    bkwd_qtrs_main,
+    frwd_qtrs_max,
+    bkwd_qtrs_max,
+    usgdp_end_date,
+    download_from_internet,
+    save_data,
+    html_show,
+):
     # The case when usgdp_end_date == 'today' and download_from_internet ==
     # False must be skipped because we don't have the data saved for every date
     fig, end_date_str = usgdp.usgdp_npp(
-        frwd_qtrs_main=frwd_qtrs_main, bkwd_qtrs_main=bkwd_qtrs_main,
-        frwd_qtrs_max=frwd_qtrs_max, bkwd_qtrs_max=bkwd_qtrs_max,
+        frwd_qtrs_main=frwd_qtrs_main,
+        bkwd_qtrs_main=bkwd_qtrs_main,
+        frwd_qtrs_max=frwd_qtrs_max,
+        bkwd_qtrs_max=bkwd_qtrs_max,
         usgdp_end_date=usgdp_end_date,
         download_from_internet=download_from_internet,
         save_data=save_data,
-        html_show=html_show)
+        html_show=html_show,
+    )
     assert fig
     assert validate(end_date_str)
