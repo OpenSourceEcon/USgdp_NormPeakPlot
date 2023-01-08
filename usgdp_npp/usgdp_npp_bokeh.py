@@ -30,8 +30,8 @@ Define functions
 '''
 
 
-def get_usgdp_data(frwd_qtrs_max, bkwd_qtrs_max, end_date_str,
-                   download_from_internet=True):
+def get_usgdp_data(frwd_qtrs_max=40, bkwd_qtrs_max=12,
+                   end_date_str="2022-12-15", download_from_internet=True):
     '''
     This function either downloads or reads in the U.S. real GDP seasonally
     adjusted quarterly data series (GDPC1) and adds variables qtrs_frm_peak and
