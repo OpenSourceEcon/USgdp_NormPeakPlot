@@ -28,11 +28,11 @@ def validate(date_text):
 
 # Test that get_usgdp_data() delivers the right structures and can download
 # the data from the internet
-def test_get_usempl_data(end_date_str="2022-11-15"):
-    data_tuple = usempl.get_usempl_data(end_date_str=end_date_str)
+def test_get_usgdp_data(end_date_str="2022-11-15"):
+    data_tuple = usgdp.get_usempl_data(end_date_str=end_date_str)
     assert len(data_tuple) == 8
     (
-        usempl_pk,
+        usgdp_pk,
         end_date_str2,
         peak_vals,
         peak_dates,
@@ -41,7 +41,7 @@ def test_get_usempl_data(end_date_str="2022-11-15"):
         rec_beg_yrmth_lst,
         maxdate_rng_lst,
     ) = data_tuple
-    assert usempl_pk.to_numpy().shape == (184, 46)
+    assert usgdp_pk.to_numpy().shape == (184, 46)
     assert end_date_str2 == "2022-11-01"
     assert len(peak_vals) == 15
     assert len(peak_dates) == 15
