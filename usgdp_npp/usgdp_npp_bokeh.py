@@ -309,9 +309,9 @@ def get_usgdp_data(
 
 
 def usgdp_npp(
-    frwd_qtrs_main=11,
+    frwd_qtrs_main=14,
     bkwd_qtrs_main=3,
-    frwd_qtrs_max=40,
+    frwd_qtrs_max=48,
     bkwd_qtrs_max=12,
     usgdp_end_date="today",
     download_from_internet=True,

@@ -42,7 +42,7 @@ def test_get_usgdp_data(end_date_str="2022-11-15", save_data=False):
         maxdate_rng_lst,
     ) = data_tuple
     assert usgdp_pk.to_numpy().shape == (53, 46)
-    assert end_date_str2 == "2022-07-01"
+    assert end_date_str2 == "2022-10-01"
     assert len(peak_vals) == 15
     assert len(peak_dates) == 15
     assert len(rec_label_yr_lst) == 15
